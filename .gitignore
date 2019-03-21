@@ -1,3 +1,4 @@
 /.env
 /grafana-annotations-bot
 /dist/
+/vendor/
