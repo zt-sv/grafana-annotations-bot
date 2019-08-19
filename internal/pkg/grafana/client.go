@@ -2,15 +2,12 @@ package grafana
 
 import (
 	"crypto/tls"
-	"encoding/json"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"path"
-	"strconv"
-	"time"
 )
 
 // Client : Grafana client
@@ -117,67 +114,4 @@ func (client *Client) apiGetRequest(apiPath string, query map[string]string) (st
 
 	level.Error(client.logger).Log("msg", "request to "+endpoint+" finished with error ", "err", err, "status code", resp.StatusCode)
 	return string(""), err
-}
-
-// HealthResp : Grafana status response
-type HealthResp struct {
-	Commit   string
-	Database string
-	Version  string
-}
-
-// GetStatus : Get Grafana status
-func (client *Client) GetStatus() (HealthResp, error) {
-	respJSON := HealthResp{}
-	respText, err := client.apiGetRequest("/api/health", nil)
-
-	if err != nil {
-		level.Error(client.logger).Log("msg", "could not get grafana health status", "err", err)
-
-		return respJSON, err
-	}
-
-	json.Unmarshal([]byte(respText), &respJSON)
-
-	return respJSON, nil
-}
-
-// Annotation : grafana annotation
-type Annotation struct {
-	ID          int
-	AlertID     int
-	DashboardID int
-	PanelID     int
-	UserID      int
-	UserName    string
-	NewState    string
-	PrevState   string
-	Time        int64
-	Text        string
-	Metric      string
-	RegionID    int
-	Tags        []string
-}
-
-// AnnotationsResp : Grafana annotations list
-type AnnotationsResp []Annotation
-
-// GetAnnotations : get annotations list from Grafana
-func (client *Client) GetAnnotations(fromTime time.Time, toTime time.Time) (AnnotationsResp, error) {
-	respJSON := AnnotationsResp{}
-
-	query := map[string]string{}
-	query["from"] = strconv.FormatInt(fromTime.UnixNano()/int64(time.Millisecond), 10)
-	query["to"] = strconv.FormatInt(toTime.UnixNano()/int64(time.Millisecond), 10)
-
-	respText, err := client.apiGetRequest("/api/annotations", query)
-
-	if err != nil {
-		level.Error(client.logger).Log("msg", "could not get grafana annotations", "err", err)
-		return respJSON, err
-	}
-
-	json.Unmarshal([]byte(respText), &respJSON)
-
-	return respJSON, nil
 }
