@@ -1,4 +1,4 @@
-package grafana_annotations_bot
+package app
 
 import (
 	"github.com/go-kit/kit/log"
@@ -6,6 +6,7 @@ import (
 	"os"
 )
 
+// GetLogger : create application logger
 func GetLogger(config Configuration) log.Logger {
 	levelFilter := map[string]level.Option{
 		levelError: level.AllowError(),

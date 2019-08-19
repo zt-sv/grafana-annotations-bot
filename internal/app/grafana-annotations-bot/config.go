@@ -1,4 +1,4 @@
-package grafana_annotations_bot
+package app
 
 import (
 	"github.com/joho/godotenv"
@@ -16,6 +16,7 @@ const (
 	levelError = "error"
 )
 
+// Configuration : main project configuration
 type Configuration = struct {
 	GrafanaURL            *url.URL
 	GrafanaToken          string
