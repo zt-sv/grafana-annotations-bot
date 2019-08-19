@@ -13,6 +13,10 @@ require (
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/stretchr/testify v1.3.0 // indirect
 	github.com/tucnak/telebot v0.0.0-20190213110836-e6cfaa833930
+	golang.org/x/crypto v0.0.0-20190320223903-b7391e95e576 // indirect
+	golang.org/x/lint v0.0.0-20190313153728-d0100b6bd8b3 // indirect
+	golang.org/x/net v0.0.0-20190320064053-1272bf9dcd53 // indirect
 	golang.org/x/sys v0.0.0-20190321052220-f7bb7a8bee54 // indirect
+	golang.org/x/tools v0.0.0-20190320215829-36c10c0a621f // indirect
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 )

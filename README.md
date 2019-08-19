@@ -47,5 +47,38 @@ This is the [Grafana annotations](http://docs.grafana.org/http_api/annotations/)
 | --log.level                               | LOG_LEVEL                        | False    | The log level to use for filtering logs, possible values: debug, info, warn, error. Default: info       |
 | --telegram.token                          | TELEGRAM_TOKEN                   | True     | The token used to connect with Telegram. Token you get from [@botfather](https://telegram.me/botfather) |
 | --template.path                           | TEMPLATE_PATH                    | True     | The path to the template                                                                                |
+| --telegram.admin                          | TELEGRAM_ADMIN                   | True     | Telegram admin IDs                                                                                      |
+
+#### Authentication
+Users may be allowed to command the bot specifies by multiply `--telegram.admin` command line option. 
+
+Example:
+```bash
+grafana-annotations-bot --telegram.admin=123 --telegram.admin=456
+```
+
+Or by specifying a newline-separated list of telegram user IDs in the TELEGRAM_ADMIN environment variable.
+
+Example:
+```bash
+TELEGRAM_ADMIN="123\n456" grafana-annotations-bot
+```
+
+#### Message template
+Message template specifies by `--template.path` command line option or by TEMPLATE_PATH environment variable.
+[Default template](default.tmpl)
+
+##### Template variables
+| Go template variable | Type     | Description                                            |
+|----------------------|----------|--------------------------------------------------------|
+| {{.Title}}           | string   | Annotation title                                       |
+| {{.Message}}         | string   | Annotation message                                     |
+| {{.Tags}}            | []string | Annotation tags                                        |
+| {{.JoinedTags}}      | string   | Annotation tags joined to string by new line separator |
+| {{.FormattedDate}}   | string   | Annotation date in RFC1123 format                      |
+| {{.Text}}            | string   | Raw annotation body string                             |
 
 
+## License
+
+  [MIT](LICENSE)
