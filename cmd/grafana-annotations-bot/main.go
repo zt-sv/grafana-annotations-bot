@@ -115,9 +115,9 @@ func main() {
 
 				lastScrapeTime = currTime
 
-				for _, annotation := range annotationsResps {
-					level.Info(logger).Log("msg", "get new annotation", "annotation", annotation)
-					annotationsChannel <- annotation
+				for i := len(annotationsResps) - 1; i >= 0; i-- {
+					level.Info(logger).Log("msg", "get new annotation", "annotation", annotationsResps[i])
+					annotationsChannel <- annotationsResps[i]
 				}
 
 			case <-quit:
