@@ -2,9 +2,10 @@ package grafana
 
 import (
 	"encoding/json"
-	"github.com/go-kit/kit/log/level"
 	"strconv"
 	"time"
+
+	"github.com/go-kit/kit/log/level"
 )
 
 // Annotation : grafana annotation

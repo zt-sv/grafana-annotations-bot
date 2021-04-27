@@ -1,12 +1,13 @@
 package app
 
 import (
-	"github.com/joho/godotenv"
-	"gopkg.in/alecthomas/kingpin.v2"
 	"html/template"
 	"net/url"
 	"os"
 	"time"
+
+	"github.com/joho/godotenv"
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 const (

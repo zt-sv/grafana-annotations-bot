@@ -2,12 +2,13 @@ package database
 
 import (
 	"encoding/json"
+	"strconv"
+
 	"github.com/docker/libkv/store"
 	"github.com/docker/libkv/store/boltdb"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"github.com/tucnak/telebot"
-	"strconv"
 )
 
 const (

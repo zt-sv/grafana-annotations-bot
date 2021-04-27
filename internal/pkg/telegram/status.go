@@ -2,9 +2,10 @@ package telegram
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/go-kit/kit/log/level"
 	"github.com/tucnak/telebot"
-	"time"
 )
 
 func (bot *Bot) handleStatus(m *telebot.Message) {

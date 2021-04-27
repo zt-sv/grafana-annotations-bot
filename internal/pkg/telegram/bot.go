@@ -2,15 +2,16 @@ package telegram
 
 import (
 	"context"
+	"html/template"
+	"runtime"
+	"time"
+
 	"github.com/13rentgen/grafana-annotations-bot/internal/pkg/database"
 	"github.com/13rentgen/grafana-annotations-bot/internal/pkg/grafana"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"github.com/oklog/run"
 	"github.com/tucnak/telebot"
-	"html/template"
-	"runtime"
-	"time"
 )
 
 const (

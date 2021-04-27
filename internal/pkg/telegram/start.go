@@ -1,9 +1,10 @@
 package telegram
 
 import (
+	"strings"
+
 	"github.com/go-kit/kit/log/level"
 	"github.com/tucnak/telebot"
-	"strings"
 )
 
 func (bot *Bot) handleStart(m *telebot.Message) {

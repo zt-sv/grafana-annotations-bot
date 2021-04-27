@@ -2,6 +2,7 @@ package grafana
 
 import (
 	"encoding/json"
+
 	"github.com/go-kit/kit/log/level"
 )
 

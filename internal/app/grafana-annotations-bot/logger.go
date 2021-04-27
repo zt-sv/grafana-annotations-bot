@@ -1,9 +1,10 @@
 package app
 
 import (
+	"os"
+
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
-	"os"
 )
 
 // GetLogger : create application logger

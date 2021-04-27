@@ -2,12 +2,13 @@ package grafana
 
 import (
 	"crypto/tls"
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"path"
+
+	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log/level"
 )
 
 // Client : Grafana client

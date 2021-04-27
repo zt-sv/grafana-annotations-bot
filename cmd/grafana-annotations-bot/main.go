@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
+	"time"
+
 	app "github.com/13rentgen/grafana-annotations-bot/internal/app/grafana-annotations-bot"
 	"github.com/13rentgen/grafana-annotations-bot/internal/pkg/database"
 	"github.com/13rentgen/grafana-annotations-bot/internal/pkg/grafana"
@@ -10,8 +13,6 @@ import (
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"github.com/oklog/run"
-	"os"
-	"time"
 )
 
 func main() {
