@@ -11,43 +11,44 @@ workspace:
   path: src/github.com/13rentgen/grafana-annotations-bot
 
 steps:
-- name: build
-  pull: always
-  image: golang:1.11-alpine
-  environment:
-    GO111MODULE: on
-  commands:
-  - apk add -U git make
-  - make build
-  - make fmt
-  - make vet
-  - make lint
-  when:
-    event:
-    - push
-    - tag
-    - pull_request
+  - name: build
+    pull: always
+    image: golang:1.17.2-alpine3.13
+    environment:
+      GO111MODULE: auto
+      GOBIN: /go/bin
+    commands:
+      - apk add -U git make
+      - make build
+      - make fmt
+      - make vet
+      - make lint
+    when:
+      event:
+        - push
+        - tag
+        - pull_request
 
-- name: release
-  pull: default
-  image: golang:1.11-alpine
-  environment:
-    GO111MODULE: on
-  commands:
-  - apk add -U git make
-  - make release
-  when:
-    event:
-    - tag
+  - name: release
+    pull: default
+    image: golang:1.17.2-alpine3.13
+    environment:
+      GO111MODULE: auto
+      GOBIN: /go/bin
+    commands:
+      - apk add -U git make
+      - make release
+    when:
+      event:
+        - tag
 
-- name: github
-  pull: default
-  image: plugins/github-release
-  settings:
-    files: "dist/*"
-  environment:
-    GITHUB_TOKEN:
-      from_secret: github_token
-  when:
-    event:
-    - tag
+  - name: github
+    pull: default
+    image: plugins/github-release
+    settings:
+      api_key:
+        from_secret: github_token
+      files: dist/*
+    when:
+      event:
+        - tag

@@ -3,7 +3,6 @@ package telegram
 import (
 	"context"
 	"html/template"
-	"runtime"
 	"time"
 
 	"github.com/13rentgen/grafana-annotations-bot/internal/pkg/database"
@@ -19,8 +18,6 @@ const (
 	commandStop   = "/stop"
 	commandStatus = "/status"
 )
-
-var botVersion = runtime.Version()
 
 // BotOptions : telegram bot config
 type BotOptions struct {
