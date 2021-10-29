@@ -67,7 +67,7 @@ func main() {
 
 	level.Info(logger).Log(
 		"msg", "grafana status",
-		"version", grafanaStatus.Version,
+		"grafana_version", grafanaStatus.Version,
 		"database", grafanaStatus.Database,
 		"commit", grafanaStatus.Commit,
 	)
