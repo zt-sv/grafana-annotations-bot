@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"net/url"
 	"os"
 	"time"
@@ -14,28 +15,60 @@ import (
 )
 
 const (
+	// StoreTypeBolt : boltdb store type
+	StoreTypeBolt = "bolt"
+	// StoreTypeEtcd : etcd store type
+	StoreTypeEtcd = "etcd"
+
+	storeKeyPrefix = "annotationsbot/chats"
+
 	levelDebug = "debug"
 	levelInfo  = "info"
 	levelWarn  = "warn"
 	levelError = "error"
 )
 
+type boltdbStoreConfig struct {
+	Path string
+}
+
+type etcdStoreConfig struct {
+	URL                   *url.URL
+	TLSInsecure           bool
+	TLSInsecureSkipVerify bool
+	TLSCert               string
+	TLSKey                string
+	TLSCA                 string
+}
+
+type grafanaConfig struct {
+	URL                   *url.URL
+	Token                 string
+	TLSInsecure           bool
+	TLSInsecureSkipVerify bool
+	TLSCert               string
+	TLSKey                string
+	ScrapeInterval        time.Duration
+}
+
+// StorageConfig : storage configuration
+type StorageConfig struct {
+	StoreType         string
+	StoreKeyPrefix    string
+	BoltdbStoreConfig boltdbStoreConfig
+	EtcdStoreConfig   etcdStoreConfig
+}
+
 // Configuration : main project configuration
 type Configuration = struct {
-	GrafanaURL            *url.URL
-	GrafanaToken          string
-	GrafanaUseTLS         bool
-	GrafanaSkipVerify     bool
-	GrafanaClientKeyFile  string
-	GrafanaClientCertFile string
-	BoltPath              string
-	LogLevel              string
-	LogJSON               bool
-	TelegramAdmins        []int
-	TelegramToken         string
-	TemplatePath          string
-	ScrapeInterval        time.Duration
-	Template              *template.Template
+	GrafanaConfig  grafanaConfig
+	StorageConfig  StorageConfig
+	LogLevel       string
+	LogJSON        bool
+	TelegramAdmins []int
+	TelegramToken  string
+	TemplatePath   string
+	Template       *template.Template
 }
 
 // LoadConfig : load application config
@@ -49,39 +82,77 @@ func LoadConfig() (Configuration, error) {
 	a.Flag("grafana.url", "The URL that's used to connect to the Grafana").
 		Required().
 		Envar("GRAFANA_URL").
-		URLVar(&config.GrafanaURL)
+		URLVar(&config.GrafanaConfig.URL)
 
 	a.Flag("grafana.token", "The Bearer token used to connect with Grafana API").
 		Required().
 		Envar("GRAFANA_TOKEN").
-		StringVar(&config.GrafanaToken)
+		StringVar(&config.GrafanaConfig.Token)
 
-	a.Flag("grafana.scrape_interval", "Scrape annotations interval").
-		Envar("SCRAPE_INTERVAL").
+	a.Flag("grafana.scrapeInterval", "Scrape annotations interval").
+		Envar("GRAFANA_SCRAPE_INTERVAL").
 		Default("10s").
-		DurationVar(&config.ScrapeInterval)
+		DurationVar(&config.GrafanaConfig.ScrapeInterval)
 
-	a.Flag("grafana.useTLS", "Use TLS to connect with Grafana").
-		Envar("GRAFANA_USE_TLS").
+	a.Flag("grafana.tls.insecure", "Insecure connection to Grafana API").
+		Envar("GRAFANA_TLS_INSECURE").
 		Default("false").
-		BoolVar(&config.GrafanaUseTLS)
+		BoolVar(&config.GrafanaConfig.TLSInsecure)
 
-	a.Flag("grafana.tls_config.insecure_skip_verify", "Grafana TLS config - insecure skip verify").
+	a.Flag("grafana.tls.insecureSkipVerify", "Grafana TLS config - insecure skip verify").
+		Default("false").
 		Envar("GRAFANA_TLS_INSECURE_SKIP_VERIFY").
-		BoolVar(&config.GrafanaUseTLS)
+		BoolVar(&config.GrafanaConfig.TLSInsecureSkipVerify)
 
-	a.Flag("grafana.tls_config.cert_file", "Grafana TLS config - client cert file path").
-		Envar("GRAFANA_TLS_CERT_FILE").
-		ExistingFileVar(&config.GrafanaClientCertFile)
+	a.Flag("grafana.tls.cert", "Grafana TLS config - client cert file path").
+		Envar("GRAFANA_TLS_CERT").
+		ExistingFileVar(&config.GrafanaConfig.TLSCert)
 
-	a.Flag("grafana.tls_config.key_file", "Grafana TLS config - client key file path").
+	a.Flag("grafana.tls.key", "Grafana TLS config - client key file path").
 		Envar("GRAFANA_TLS_KEY_FILE").
-		ExistingFileVar(&config.GrafanaClientKeyFile)
+		ExistingFileVar(&config.GrafanaConfig.TLSKey)
+
+	a.Flag("store.type", fmt.Sprintf("The store to use. Possible values %s, %s", StoreTypeBolt, StoreTypeEtcd)).
+		Envar("STORE_TYPE").
+		Default(StoreTypeBolt).
+		EnumVar(&config.StorageConfig.StoreType, StoreTypeBolt, StoreTypeEtcd)
+
+	a.Flag("store.keyPrefix", "Prefix for store keys").
+		Envar("STORE_KEY_PREFIX").
+		Default(storeKeyPrefix).
+		StringVar(&config.StorageConfig.StoreKeyPrefix)
 
 	a.Flag("bolt.path", "The path to the file where bolt persists its data").
-		Required().
+		Default("/tmp/bot.db").
 		Envar("BOLT_PATH").
-		StringVar(&config.BoltPath)
+		StringVar(&config.StorageConfig.BoltdbStoreConfig.Path)
+
+	a.Flag("etcd.url", "The URL that's used to connect to the etcd store").
+		Default("localhost:2379").
+		Envar("ETCD_URL").
+		URLVar(&config.StorageConfig.EtcdStoreConfig.URL)
+
+	a.Flag("etcd.tls.insecure", "Insecure connection to ETCD").
+		Default("false").
+		Envar("ETCD_TLS_INSECURE").
+		BoolVar(&config.StorageConfig.EtcdStoreConfig.TLSInsecure)
+
+	a.Flag("etcd.tls.insecureSkipVerify", "ETCD TLS config - insecure skip verify").
+		Default("false").
+		Envar("ETCD_TLS_INSECURE_SKIP_VERIFY").
+		BoolVar(&config.StorageConfig.EtcdStoreConfig.TLSInsecureSkipVerify)
+
+	a.Flag("etcd.tls.cert", "ETCD TLS config - client cert file path").
+		Envar("ETCD_TLS_CERT").
+		StringVar(&config.StorageConfig.EtcdStoreConfig.TLSCert)
+
+	a.Flag("etcd.tls.key", "ETCD TLS config - client key file path").
+		Envar("ETCD_TLS_KEY").
+		StringVar(&config.StorageConfig.EtcdStoreConfig.TLSKey)
+
+	a.Flag("etcd.tls.ca", "ETCD TLS config - CA file path").
+		Envar("ETCD_TLS_CA").
+		StringVar(&config.StorageConfig.EtcdStoreConfig.TLSCA)
 
 	a.Flag("log.json", "Tell the application to log json and not key value pairs").
 		Envar("LOG_JSON").

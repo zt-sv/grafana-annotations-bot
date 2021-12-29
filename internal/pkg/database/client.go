@@ -1,63 +1,97 @@
 package database
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
-	"strconv"
+	"fmt"
+	"io/ioutil"
+	"strings"
+
+	app "github.com/13rentgen/grafana-annotations-bot/internal/app/grafana-annotations-bot"
 
 	"github.com/docker/libkv/store"
 	"github.com/docker/libkv/store/boltdb"
+	"github.com/docker/libkv/store/etcd"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"github.com/tucnak/telebot"
 )
 
 const (
-	bucket        = "grafana-annotations-bot"
-	chatKeyPrefix = "tgchat_"
+	bucket = "grafana-annotations-bot"
 )
 
-// DbClient : client for bolt store
+// DbClient : client for store
 type DbClient struct {
-	path   string
-	logger log.Logger
+	logger         log.Logger
+	store          store.Store
+	storeKeyPrefix string
 }
 
-// ClientConfig : Bolt store client configuration
-type ClientConfig struct {
-	Path   string
-	Logger log.Logger
-}
+// NewDB : Create new store client
+func NewDB(config app.StorageConfig, logger log.Logger) (*DbClient, error) {
+	var err error
+	var kvStore store.Store
 
-// NewDB : Create new bolt store client
-func NewDB(config ClientConfig) (*DbClient, error) {
-	boltStore, err := boltdb.New([]string{config.Path}, &store.Config{Bucket: bucket})
+	switch strings.ToLower(config.StoreType) {
+	case app.StoreTypeBolt:
+		kvStore, err = boltdb.New([]string{config.BoltdbStoreConfig.Path}, &store.Config{Bucket: bucket})
+		if err != nil {
+			level.Error(logger).Log("msg", "failed to create bolt store backend", "err", err)
+			return nil, err
+		}
 
-	if err != nil {
-		level.Error(config.Logger).Log("msg", "failed to create bolt store", "err", err)
+	case app.StoreTypeEtcd:
+		tlsConfig := &tls.Config{}
 
+		if config.EtcdStoreConfig.TLSCert != "" {
+			cert, err := tls.LoadX509KeyPair(config.EtcdStoreConfig.TLSCert, config.EtcdStoreConfig.TLSKey)
+			if err != nil {
+				level.Error(logger).Log("msg", "failed to create etcd store backend, could not load certificates", "err", err)
+				return nil, err
+			}
+			tlsConfig.Certificates = []tls.Certificate{cert}
+		}
+
+		if config.EtcdStoreConfig.TLSCA != "" {
+			caCert, err := ioutil.ReadFile(config.EtcdStoreConfig.TLSCA)
+			if err != nil {
+				level.Error(logger).Log("msg", "failed to create etcd store backend, could not load ca certificate", "err", err)
+				return nil, err
+			}
+
+			caCertPool := x509.NewCertPool()
+			caCertPool.AppendCertsFromPEM(caCert)
+			tlsConfig.RootCAs = caCertPool
+		}
+
+		tlsConfig.InsecureSkipVerify = config.EtcdStoreConfig.TLSInsecureSkipVerify
+
+		if !config.EtcdStoreConfig.TLSInsecure {
+			kvStore, err = etcd.New([]string{config.EtcdStoreConfig.URL.String()}, &store.Config{TLS: tlsConfig})
+		} else {
+			kvStore, err = etcd.New([]string{config.EtcdStoreConfig.URL.String()}, nil)
+		}
+
+		if err != nil {
+			level.Error(logger).Log("msg", "failed to create etcd store backend", "err", err)
+			return nil, err
+		}
+	default:
+		level.Error(logger).Log("msg", "please provide one of the following supported store backends: bolt, etcd")
 		return nil, err
 	}
 
 	client := &DbClient{
-		path:   config.Path,
-		logger: config.Logger,
+		logger:         logger,
+		store:          kvStore,
+		storeKeyPrefix: config.StoreKeyPrefix,
 	}
 
-	defer boltStore.Close()
+	defer kvStore.Close()
 
 	return client, nil
-}
-
-func (client *DbClient) open() (store.Store, error) {
-	boltStore, err := boltdb.New([]string{client.path}, &store.Config{Bucket: bucket})
-
-	if err != nil {
-		level.Error(client.logger).Log("msg", "failed to open bolt store", "err", err)
-
-		return nil, err
-	}
-
-	return boltStore, nil
 }
 
 // StoreValue : telebot chat and tags list
@@ -67,19 +101,11 @@ type StoreValue struct {
 }
 
 func (client *DbClient) createStoreKey(chat *telebot.Chat) string {
-	return chatKeyPrefix + strconv.FormatInt(chat.ID, 10)
+	return fmt.Sprintf("%s/%d", client.storeKeyPrefix, chat.ID)
 }
 
 // AddChatTags : Add telebot chat and subscribed tags to bolt store
 func (client *DbClient) AddChatTags(chat *telebot.Chat, tags []string) error {
-	boltStore, err := client.open()
-
-	if err != nil {
-		return err
-	}
-
-	defer boltStore.Close()
-
 	storeValue, err := json.Marshal(&StoreValue{
 		Tags: tags,
 		Chat: chat,
@@ -89,7 +115,7 @@ func (client *DbClient) AddChatTags(chat *telebot.Chat, tags []string) error {
 		return err
 	}
 
-	err = boltStore.Put(
+	err = client.store.Put(
 		client.createStoreKey(chat),
 		storeValue,
 		nil,
@@ -100,13 +126,7 @@ func (client *DbClient) AddChatTags(chat *telebot.Chat, tags []string) error {
 
 // GetChatTags : Get subscribed tags for the chat from bolt store
 func (client *DbClient) GetChatTags(chat *telebot.Chat) ([]string, error) {
-	boltStore, err := client.open()
-
-	if err != nil {
-		return nil, err
-	}
-
-	pair, err := boltStore.Get(client.createStoreKey(chat))
+	pair, err := client.store.Get(client.createStoreKey(chat))
 
 	if err != nil {
 		level.Error(client.logger).Log("msg", "failed to get chat tags", "err", err)
@@ -118,22 +138,12 @@ func (client *DbClient) GetChatTags(chat *telebot.Chat) ([]string, error) {
 
 	json.Unmarshal(pair.Value, &value)
 
-	defer boltStore.Close()
-
 	return value.Tags, err
 }
 
 // ExistChat : Check chat exist into bolt store
 func (client *DbClient) ExistChat(chat *telebot.Chat) (bool, error) {
-	boltStore, err := client.open()
-
-	if err != nil {
-		return false, err
-	}
-
-	defer boltStore.Close()
-
-	exist, err := boltStore.Exists(client.createStoreKey(chat))
+	exist, err := client.store.Exists(client.createStoreKey(chat))
 
 	if err == store.ErrKeyNotFound {
 		return false, nil
@@ -144,28 +154,12 @@ func (client *DbClient) ExistChat(chat *telebot.Chat) (bool, error) {
 
 // Remove : Remove chat from bolt store
 func (client *DbClient) Remove(chat *telebot.Chat) error {
-	boltStore, err := client.open()
-
-	if err != nil {
-		return err
-	}
-
-	defer boltStore.Close()
-
-	return boltStore.Delete(client.createStoreKey(chat))
+	return client.store.Delete(client.createStoreKey(chat))
 }
 
 // List : Get chat and tags list from bolt store
 func (client *DbClient) List() ([]StoreValue, error) {
-	boltStore, err := client.open()
-
-	if err != nil {
-		return nil, err
-	}
-
-	defer boltStore.Close()
-
-	pairs, err := boltStore.List(chatKeyPrefix)
+	pairs, err := client.store.List(client.storeKeyPrefix)
 
 	if err != nil {
 		return nil, err
