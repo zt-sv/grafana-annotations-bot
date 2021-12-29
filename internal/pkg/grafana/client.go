@@ -13,44 +13,44 @@ import (
 
 // Client : Grafana client
 type Client struct {
-	grafanaURL *url.URL
-	token      string
-	useTLS     bool
-	skipVerify bool
-	caFile     string
-	certFile   string
-	keyFile    string
-	logger     log.Logger
+	grafanaURL  *url.URL
+	token       string
+	TLSInsecure bool
+	skipVerify  bool
+	caFile      string
+	certFile    string
+	keyFile     string
+	logger      log.Logger
 }
 
 // ClientConfig : Grafana client config
 type ClientConfig struct {
-	URL        *url.URL
-	Token      string
-	UseTLS     bool
-	SkipVerify bool
-	CertFile   string
-	KeyFile    string
-	Logger     log.Logger
+	URL         *url.URL
+	Token       string
+	TLSInsecure bool
+	SkipVerify  bool
+	CertFile    string
+	KeyFile     string
+	Logger      log.Logger
 }
 
 // NewClient : create new Grafana client
 func NewClient(config ClientConfig) (*Client, error) {
 	client := &Client{
-		grafanaURL: config.URL,
-		token:      config.Token,
-		useTLS:     config.UseTLS,
-		skipVerify: config.SkipVerify,
-		certFile:   config.CertFile,
-		keyFile:    config.KeyFile,
-		logger:     config.Logger,
+		grafanaURL:  config.URL,
+		token:       config.Token,
+		TLSInsecure: config.TLSInsecure,
+		skipVerify:  config.SkipVerify,
+		certFile:    config.CertFile,
+		keyFile:     config.KeyFile,
+		logger:      config.Logger,
 	}
 
 	return client, nil
 }
 
 func (client *Client) getHTTPClient() *http.Client {
-	if client.useTLS {
+	if !client.TLSInsecure {
 		cert, err := tls.LoadX509KeyPair(client.certFile, client.keyFile)
 
 		if err != nil {

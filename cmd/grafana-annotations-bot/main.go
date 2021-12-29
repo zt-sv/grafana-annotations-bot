@@ -26,29 +26,26 @@ func main() {
 
 	var logger = app.GetLogger(config)
 
-	// Create BoltDB store
-	boltStore, err := database.NewDB(
-		database.ClientConfig{
-			Path:   config.BoltPath,
-			Logger: log.With(logger, "component", "database"),
-		},
+	kvStore, err := database.NewDB(
+		config.StorageConfig,
+		log.With(logger, "component", "database"),
 	)
 
 	if err != nil {
-		level.Error(logger).Log("msg", "failed to create bolt store client", "err", err)
+		level.Error(logger).Log("msg", "failed to create store client", "err", err)
 		os.Exit(1)
 	}
 
 	// Create Grafana client
 	grafanaClient, err := grafana.NewClient(
 		grafana.ClientConfig{
-			URL:        config.GrafanaURL,
-			Token:      config.GrafanaToken,
-			UseTLS:     config.GrafanaUseTLS,
-			SkipVerify: config.GrafanaSkipVerify,
-			CertFile:   config.GrafanaClientCertFile,
-			KeyFile:    config.GrafanaClientKeyFile,
-			Logger:     log.With(logger, "component", "grafana_client"),
+			URL:         config.GrafanaConfig.URL,
+			Token:       config.GrafanaConfig.Token,
+			TLSInsecure: config.GrafanaConfig.TLSInsecure,
+			SkipVerify:  config.GrafanaConfig.TLSInsecureSkipVerify,
+			CertFile:    config.GrafanaConfig.TLSCert,
+			KeyFile:     config.GrafanaConfig.TLSKey,
+			Logger:      log.With(logger, "component", "grafana_client"),
 		},
 	)
 
@@ -76,7 +73,7 @@ func main() {
 	tgBot, err := tg.NewBot(
 		tg.BotOptions{
 			Token:         config.TelegramToken,
-			Store:         boltStore,
+			Store:         kvStore,
 			Logger:        log.With(logger, "component", "telegram_bot"),
 			Template:      config.Template,
 			GrafanaClient: grafanaClient,
@@ -91,7 +88,7 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	annotationsChannel := make(chan grafana.Annotation, 32)
-	ticker := time.NewTicker(config.ScrapeInterval)
+	ticker := time.NewTicker(config.GrafanaConfig.ScrapeInterval)
 	lastScrapeTime := time.Now()
 	quit := make(chan struct{})
 
