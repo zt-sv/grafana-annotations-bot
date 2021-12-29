@@ -1,9 +1,10 @@
 ARG GO_VERSION=1.17.2
-
+ARG APP_VERSION=dev
 FROM golang:${GO_VERSION}-alpine AS build
 
 ENV GO111MODULE=auto
 ENV GOBIN=/go/bin
+ENV DRONE_TAG=$APP_VERSION
 
 RUN apk --no-cache add make
 

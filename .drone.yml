@@ -52,3 +52,19 @@ steps:
     when:
       event:
         - tag
+
+  - name: docker
+    image: plugins/docker
+    settings:
+      repo: quay.io/13rentgen/grafana-annotations-bot
+      registry: quay.io
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+      auto_tag: true
+      build_args:
+        - APP_VERSION=$DRONE_TAG
+    when:
+      event:
+        - tag

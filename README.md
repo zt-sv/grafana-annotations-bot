@@ -1,4 +1,7 @@
-# Telegram Bot for Grafana's Annotations [![Build Status](https://cloud.drone.io/api/badges/13rentgen/grafana-annotations-bot/status.svg)](https://cloud.drone.io/13rentgen/grafana-annotations-bot)
+# Telegram Bot for Grafana's Annotations 
+
+[![Build Status](https://cloud.drone.io/api/badges/13rentgen/grafana-annotations-bot/status.svg)](https://cloud.drone.io/13rentgen/grafana-annotations-bot)
+[![Docker Repository on Quay](https://quay.io/repository/13rentgen/grafana-annotations-bot/status "Docker Repository on Quay")](https://quay.io/repository/13rentgen/grafana-annotations-bot)
 
 This is the [Grafana annotations](http://docs.grafana.org/http_api/annotations/) Telegram bot that notifies you when new annotations will be added to Grafana.  
 
@@ -28,6 +31,45 @@ This is the [Grafana annotations](http://docs.grafana.org/http_api/annotations/)
 
 ## Installation
 
+### Docker
+
+`docker pull quay.io/13rentgen/grafana-annotations-bot:1.1.0`
+
+#### Bolt Storage
+
+```bash
+docker run -d \
+	-e 'GRAFANA_URL=http://grafana:3000' \
+	-e 'GRAFANA_TOKEN=XXX' \
+	-e 'STORE=bolt' \
+    -e 'BOLT_PATH=/data/bot.db' \
+	-e 'TELEGRAM_ADMIN=1234567' \
+	-e 'TELEGRAM_TOKEN=XXX' \
+	-e 'TEMPLATE_PATH=/templates/default.tmpl' \
+	-v '/data/grafana-annotations-bot:/data' \
+	-v '${PWD}/default.tmpl:/templates/default.tmpl' \
+	--name grafana-annotations-bot \
+	quay.io/13rentgen/grafana-annotations-bot:1.1.0
+```
+
+#### ETCD Storage
+
+```bash
+docker run -d \
+	-e 'GRAFANA_URL=http://grafana:3000' \
+	-e 'GRAFANA_TOKEN=XXX' \
+	-e 'STORE=etcd' \
+	-e 'ETCD_URL=localhost:2379' \
+	-e 'ETCD_TLS_INSECURE=true' \
+	-e 'TELEGRAM_ADMIN=1234567' \
+	-e 'TELEGRAM_TOKEN=XXX' \
+	-e 'TEMPLATE_PATH=/templates/default.tmpl' \
+	-v '/data/grafana-annotations-bot:/data' \
+	-v '${PWD}/default.tmpl:/templates/default.tmpl' \
+	--name grafana-annotations-bot \
+	quay.io/13rentgen/grafana-annotations-bot:1.1.0
+```
+
 ### Build from source
 
 `go get github.com/13rentgen/grafana-annotations-bot`
@@ -48,7 +90,7 @@ This is the [Grafana annotations](http://docs.grafana.org/http_api/annotations/)
 | --etcd.url                       | ETCD_URL                         | False    | `localhost:2379`       |                                                                                                         |
 | --etcd.tls.insecure              | ETCD_TLS_INSECURE                | False    | `false`                | Insecure connection to ETCD                                                                             |
 | --etcd.tls.insecureSkipVerify    | ETCD_TLS_INSECURE_SKIP_VERIFY    | False    | `false`                | ETCD TLS config - insecure skip verify                                                                  |
-| -etcd.tls.cert                   | ETCD_TLS_CERT                    | False    |                        | ETCD TLS config - client cert file path                                                                 |
+| --etcd.tls.cert                  | ETCD_TLS_CERT                    | False    |                        | ETCD TLS config - client cert file path                                                                 |
 | --etcd.tls.key                   | ETCD_TLS_KEY                     | False    |                        | ETCD TLS config - client key file path                                                                  |
 | --etcd.tls.ca                    | ETCD_TLS_CA                      | False    |                        | ETCD TLS config - CA file path                                                                          |
 | --log.json                       | LOG_JSON                         | False    | `false`                | Tell the application to log json, default: false                                                        |
