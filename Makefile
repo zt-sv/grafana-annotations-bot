@@ -1,7 +1,7 @@
 EXECUTABLE ?= grafana-annotations-bot
 GO := CGO_ENABLED=0 go
 DRONE_TAG ?= dev
-VPREFIX := github.com/13rentgen/grafana-annotations-bot/internal/pkg/build
+VPREFIX := github.com/zt-sv/grafana-annotations-bot/internal/pkg/build
 LDFLAGS += -X $(VPREFIX).Version=$(DRONE_TAG) -X $(VPREFIX).BuildDate=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 LDFLAGS += -extldflags '-static'
 

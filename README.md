@@ -1,7 +1,7 @@
 # Telegram Bot for Grafana's Annotations 
 
-[![Build Status](https://cloud.drone.io/api/badges/13rentgen/grafana-annotations-bot/status.svg)](https://cloud.drone.io/13rentgen/grafana-annotations-bot)
-[![Docker Repository on Quay](https://quay.io/repository/13rentgen/grafana-annotations-bot/status "Docker Repository on Quay")](https://quay.io/repository/13rentgen/grafana-annotations-bot)
+[![Build Status](https://cloud.drone.io/api/badges/zt-sv/grafana-annotations-bot/status.svg)](https://cloud.drone.io/zt-sv/grafana-annotations-bot)
+[![Docker Repository on Quay](https://quay.io/repository/zt-sv/grafana-annotations-bot/status "Docker Repository on Quay")](https://quay.io/repository/zt-sv/grafana-annotations-bot)
 
 This is the [Grafana annotations](http://docs.grafana.org/http_api/annotations/) Telegram bot that notifies you when new annotations will be added to Grafana.  
 
@@ -33,7 +33,7 @@ This is the [Grafana annotations](http://docs.grafana.org/http_api/annotations/)
 
 ### Docker
 
-`docker pull quay.io/13rentgen/grafana-annotations-bot:1.1.0`
+`docker pull quay.io/zt-sv/grafana-annotations-bot:1.1.0`
 
 #### Bolt Storage
 
@@ -49,7 +49,7 @@ docker run -d \
 	-v '/data/grafana-annotations-bot:/data' \
 	-v '${PWD}/default.tmpl:/templates/default.tmpl' \
 	--name grafana-annotations-bot \
-	quay.io/13rentgen/grafana-annotations-bot:1.1.0
+	quay.io/zt-sv/grafana-annotations-bot:1.1.0
 ```
 
 #### ETCD Storage
@@ -67,12 +67,12 @@ docker run -d \
 	-v '/data/grafana-annotations-bot:/data' \
 	-v '${PWD}/default.tmpl:/templates/default.tmpl' \
 	--name grafana-annotations-bot \
-	quay.io/13rentgen/grafana-annotations-bot:1.1.0
+	quay.io/zt-sv/grafana-annotations-bot:1.1.0
 ```
 
 ### Build from source
 
-`go get github.com/13rentgen/grafana-annotations-bot`
+`go get github.com/zt-sv/grafana-annotations-bot`
 
 ### Configuration
 | Flag                             | ENV                              | Required | Default                | Description                                                                                             |

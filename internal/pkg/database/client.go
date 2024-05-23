@@ -1,21 +1,22 @@
 package database
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"github.com/kvtools/valkeyrie/store"
+	"gopkg.in/telebot.v3"
 	"io/ioutil"
 	"strings"
 
-	app "github.com/13rentgen/grafana-annotations-bot/internal/app/grafana-annotations-bot"
+	app "github.com/zt-sv/grafana-annotations-bot/internal/app/grafana-annotations-bot"
 
-	"github.com/docker/libkv/store"
-	"github.com/docker/libkv/store/boltdb"
-	"github.com/docker/libkv/store/etcd"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
-	"github.com/tucnak/telebot"
+	"github.com/kvtools/boltdb"
+	etcd "github.com/kvtools/etcdv3"
 )
 
 const (
@@ -33,10 +34,11 @@ type DbClient struct {
 func NewDB(config app.StorageConfig, logger log.Logger) (*DbClient, error) {
 	var err error
 	var kvStore store.Store
+	ctx := context.Background()
 
 	switch strings.ToLower(config.StoreType) {
 	case app.StoreTypeBolt:
-		kvStore, err = boltdb.New([]string{config.BoltdbStoreConfig.Path}, &store.Config{Bucket: bucket})
+		kvStore, err = boltdb.New(ctx, []string{config.BoltdbStoreConfig.Path}, &boltdb.Config{Bucket: bucket})
 		if err != nil {
 			level.Error(logger).Log("msg", "failed to create bolt store backend", "err", err)
 			return nil, err
@@ -69,9 +71,9 @@ func NewDB(config app.StorageConfig, logger log.Logger) (*DbClient, error) {
 		tlsConfig.InsecureSkipVerify = config.EtcdStoreConfig.TLSInsecureSkipVerify
 
 		if !config.EtcdStoreConfig.TLSInsecure {
-			kvStore, err = etcd.New([]string{config.EtcdStoreConfig.URL.String()}, &store.Config{TLS: tlsConfig})
+			kvStore, err = etcd.New(ctx, []string{config.EtcdStoreConfig.URL.String()}, &etcd.Config{TLS: tlsConfig})
 		} else {
-			kvStore, err = etcd.New([]string{config.EtcdStoreConfig.URL.String()}, nil)
+			kvStore, err = etcd.New(ctx, []string{config.EtcdStoreConfig.URL.String()}, nil)
 		}
 
 		if err != nil {
@@ -106,6 +108,7 @@ func (client *DbClient) createStoreKey(chat *telebot.Chat) string {
 
 // AddChatTags : Add telebot chat and subscribed tags to bolt store
 func (client *DbClient) AddChatTags(chat *telebot.Chat, tags []string) error {
+	ctx := context.Background()
 	storeValue, err := json.Marshal(&StoreValue{
 		Tags: tags,
 		Chat: chat,
@@ -116,6 +119,7 @@ func (client *DbClient) AddChatTags(chat *telebot.Chat, tags []string) error {
 	}
 
 	err = client.store.Put(
+		ctx,
 		client.createStoreKey(chat),
 		storeValue,
 		nil,
@@ -126,7 +130,8 @@ func (client *DbClient) AddChatTags(chat *telebot.Chat, tags []string) error {
 
 // GetChatTags : Get subscribed tags for the chat from bolt store
 func (client *DbClient) GetChatTags(chat *telebot.Chat) ([]string, error) {
-	pair, err := client.store.Get(client.createStoreKey(chat))
+	ctx := context.Background()
+	pair, err := client.store.Get(ctx, client.createStoreKey(chat), nil)
 
 	if err != nil {
 		level.Error(client.logger).Log("msg", "failed to get chat tags", "err", err)
@@ -143,7 +148,8 @@ func (client *DbClient) GetChatTags(chat *telebot.Chat) ([]string, error) {
 
 // ExistChat : Check chat exist into bolt store
 func (client *DbClient) ExistChat(chat *telebot.Chat) (bool, error) {
-	exist, err := client.store.Exists(client.createStoreKey(chat))
+	ctx := context.Background()
+	exist, err := client.store.Exists(ctx, client.createStoreKey(chat), nil)
 
 	if err == store.ErrKeyNotFound {
 		return false, nil
@@ -154,12 +160,14 @@ func (client *DbClient) ExistChat(chat *telebot.Chat) (bool, error) {
 
 // Remove : Remove chat from bolt store
 func (client *DbClient) Remove(chat *telebot.Chat) error {
-	return client.store.Delete(client.createStoreKey(chat))
+	ctx := context.Background()
+	return client.store.Delete(ctx, client.createStoreKey(chat))
 }
 
 // List : Get chat and tags list from bolt store
 func (client *DbClient) List() ([]StoreValue, error) {
-	pairs, err := client.store.List(client.storeKeyPrefix)
+	ctx := context.Background()
+	pairs, err := client.store.List(ctx, client.storeKeyPrefix, nil)
 
 	if err != nil {
 		return nil, err

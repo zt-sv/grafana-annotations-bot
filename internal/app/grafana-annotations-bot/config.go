@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
+	kingpin "github.com/alecthomas/kingpin/v2"
 	"github.com/joho/godotenv"
-	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 import (
@@ -65,7 +65,7 @@ type Configuration = struct {
 	StorageConfig  StorageConfig
 	LogLevel       string
 	LogJSON        bool
-	TelegramAdmins []int
+	TelegramAdmins []int64
 	TelegramToken  string
 	TemplatePath   string
 	Template       *template.Template
@@ -177,7 +177,7 @@ func LoadConfig() (Configuration, error) {
 	a.Flag("telegram.admin", "The Telegram Admin ID").
 		Required().
 		Envar("TELEGRAM_ADMIN").
-		IntsVar(&config.TelegramAdmins)
+		Int64ListVar(&config.TelegramAdmins)
 
 	_, err := a.Parse(os.Args[1:])
 

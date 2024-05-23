@@ -5,12 +5,12 @@ import (
 	"html/template"
 	"time"
 
-	"github.com/13rentgen/grafana-annotations-bot/internal/pkg/database"
-	"github.com/13rentgen/grafana-annotations-bot/internal/pkg/grafana"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"github.com/oklog/run"
-	"github.com/tucnak/telebot"
+	"github.com/zt-sv/grafana-annotations-bot/internal/pkg/database"
+	"github.com/zt-sv/grafana-annotations-bot/internal/pkg/grafana"
+	"gopkg.in/telebot.v3"
 )
 
 const (
@@ -28,7 +28,7 @@ type BotOptions struct {
 	Revision      string
 	Template      *template.Template
 	GrafanaClient *grafana.Client
-	Admins        []int
+	Admins        []int64
 }
 
 // Bot : telegram bot
@@ -40,7 +40,7 @@ type Bot struct {
 	tb            *telebot.Bot
 	template      *template.Template
 	grafanaClient *grafana.Client
-	admins        []int
+	admins        []int64
 }
 
 // NewBot : create new telegram bot
@@ -94,24 +94,28 @@ func (bot *Bot) Run(ctx context.Context, annotationsChannel <-chan grafana.Annot
 	return gr.Run()
 }
 
-func (bot *Bot) onlyForAdmins(handler func(m *telebot.Message)) func(m *telebot.Message) {
-	return func(m *telebot.Message) {
+func (bot *Bot) onlyForAdmins(handler func(m *telebot.Message) error) func(telebot.Context) error {
+	return func(c telebot.Context) error {
+		var m = c.Message()
 		if !bot.isAdminID(m.Sender.ID) {
 			level.Error(bot.logger).Log("msg", "Receive command from not admin user")
-			bot.tb.Send(
+			_, err := bot.tb.Send(
 				m.Chat,
 				"Permission denied",
 				&telebot.SendOptions{ParseMode: telebot.ModeMarkdown},
 			)
-			return
+			if err != nil {
+				return err
+			}
+			return nil
 		}
 
-		handler(m)
+		return handler(m)
 	}
 }
 
 // isAdminID returns whether id is one of the configured admin IDs.
-func (bot *Bot) isAdminID(id int) bool {
+func (bot *Bot) isAdminID(id int64) bool {
 	for _, adminID := range bot.admins {
 		if id == adminID {
 			return true

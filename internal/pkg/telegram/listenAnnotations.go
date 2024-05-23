@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/13rentgen/grafana-annotations-bot/internal/pkg/grafana"
 	"github.com/go-kit/kit/log/level"
-	"github.com/tucnak/telebot"
+	"github.com/zt-sv/grafana-annotations-bot/internal/pkg/grafana"
+	telebot "gopkg.in/telebot.v3"
 )
 
 type templateData struct {

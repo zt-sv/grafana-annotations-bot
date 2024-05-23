@@ -4,21 +4,24 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/13rentgen/grafana-annotations-bot/internal/pkg/build"
 	"github.com/go-kit/kit/log/level"
-	"github.com/tucnak/telebot"
+	"github.com/zt-sv/grafana-annotations-bot/internal/pkg/build"
+	telebot "gopkg.in/telebot.v3"
 )
 
-func (bot *Bot) handleStatus(m *telebot.Message) {
+func (bot *Bot) handleStatus(m *telebot.Message) error {
 	grafanaStatus, err := bot.grafanaClient.GetStatus()
 
 	if err != nil {
 		level.Warn(bot.logger).Log("msg", "failed to get grafana status", "err", err)
-		bot.tb.Send(m.Chat, fmt.Sprintf("failed to get status... %v", err), nil)
-		return
+		_, err2 := bot.tb.Send(m.Chat, fmt.Sprintf("failed to get status... %v", err), nil)
+		if err2 != nil {
+			return err2
+		}
+		return err
 	}
 
-	bot.tb.Send(
+	_, err = bot.tb.Send(
 		m.Chat,
 		fmt.Sprintf(
 			"*Grafana*\nVersion: %s\nDatabase: %s\n\n*Telegram Bot*\nVersion: %s\nBuild date: %s\nGo version: %s\nUptime: %s",
@@ -31,4 +34,6 @@ func (bot *Bot) handleStatus(m *telebot.Message) {
 		),
 		&telebot.SendOptions{ParseMode: telebot.ModeMarkdown},
 	)
+
+	return err
 }
