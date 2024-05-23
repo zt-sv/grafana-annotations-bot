@@ -102,7 +102,7 @@ func NewDB(config app.StorageConfig, logger log.Logger) (*DbClient, error) {
 // StoreValue : telebot chat and tags list
 type StoreValue struct {
 	Tags     []string
-	ThreadId int
+	ThreadID int
 	Chat     *telebot.Chat
 }
 
@@ -118,7 +118,7 @@ func (client *DbClient) AddChatTags(chat *telebot.Chat, thread int, tags []strin
 	ctx := context.Background()
 	storeValue, err := json.Marshal(&StoreValue{
 		Tags:     tags,
-		ThreadId: thread,
+		ThreadID: thread,
 		Chat:     chat,
 	})
 
@@ -147,7 +147,7 @@ func (client *DbClient) GetChatTags(chat *telebot.Chat, thread int) ([]string, e
 		return nil, err
 	}
 
-	value := StoreValue{ThreadId: 0}
+	value := StoreValue{ThreadID: 0}
 
 	json.Unmarshal(pair.Value, &value)
 
@@ -188,7 +188,7 @@ func (client *DbClient) List() ([]StoreValue, error) {
 
 	var values []StoreValue
 	for _, kv := range pairs {
-		v := StoreValue{ThreadId: 0}
+		v := StoreValue{ThreadID: 0}
 
 		if err := json.Unmarshal(kv.Value, &v); err != nil {
 			level.Error(client.logger).Log("msg", fmt.Sprintf("Could not unmarshal json value %s", kv.Value), "err", err)

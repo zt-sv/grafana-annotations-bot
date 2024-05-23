@@ -83,7 +83,7 @@ func (bot *Bot) listenAnnotations(ctx context.Context, annotationsChannel <-chan
 					bot.tb.Send(
 						chatAndTags.Chat,
 						renderedTpl,
-						&telebot.SendOptions{ParseMode: telebot.ModeHTML, ThreadID: chatAndTags.ThreadId},
+						&telebot.SendOptions{ParseMode: telebot.ModeHTML, ThreadID: chatAndTags.ThreadID},
 					)
 				}
 			}
