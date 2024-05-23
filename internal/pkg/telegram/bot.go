@@ -102,7 +102,7 @@ func (bot *Bot) onlyForAdmins(handler func(m *telebot.Message) error) func(teleb
 			_, err := bot.tb.Send(
 				m.Chat,
 				"Permission denied",
-				&telebot.SendOptions{ParseMode: telebot.ModeMarkdown},
+				&telebot.SendOptions{ParseMode: telebot.ModeMarkdown, ThreadID: m.ThreadID},
 			)
 			if err != nil {
 				return err

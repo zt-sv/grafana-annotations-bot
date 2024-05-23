@@ -8,7 +8,7 @@ import (
 
 	"github.com/go-kit/kit/log/level"
 	"github.com/zt-sv/grafana-annotations-bot/internal/pkg/grafana"
-	telebot "gopkg.in/telebot.v3"
+	"gopkg.in/telebot.v3"
 )
 
 type templateData struct {
@@ -80,7 +80,11 @@ func (bot *Bot) listenAnnotations(ctx context.Context, annotationsChannel <-chan
 
 			for _, chatAndTags := range chatAndTagsList {
 				if allTagsExist(annotation.Tags, chatAndTags.Tags) {
-					bot.tb.Send(chatAndTags.Chat, renderedTpl, &telebot.SendOptions{ParseMode: telebot.ModeHTML})
+					bot.tb.Send(
+						chatAndTags.Chat,
+						renderedTpl,
+						&telebot.SendOptions{ParseMode: telebot.ModeHTML, ThreadID: chatAndTags.ThreadId},
+					)
 				}
 			}
 		}

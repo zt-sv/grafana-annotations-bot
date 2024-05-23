@@ -14,7 +14,11 @@ func (bot *Bot) handleStatus(m *telebot.Message) error {
 
 	if err != nil {
 		level.Warn(bot.logger).Log("msg", "failed to get grafana status", "err", err)
-		_, err2 := bot.tb.Send(m.Chat, fmt.Sprintf("failed to get status... %v", err), nil)
+		_, err2 := bot.tb.Send(
+			m.Chat,
+			fmt.Sprintf("failed to get status... %v", err),
+			&telebot.SendOptions{ParseMode: telebot.ModeMarkdown, ThreadID: m.ThreadID},
+		)
 		if err2 != nil {
 			return err2
 		}
@@ -32,7 +36,7 @@ func (bot *Bot) handleStatus(m *telebot.Message) error {
 			build.GoVersion,
 			bot.startTime.Format(time.RFC1123),
 		),
-		&telebot.SendOptions{ParseMode: telebot.ModeMarkdown},
+		&telebot.SendOptions{ParseMode: telebot.ModeMarkdown, ThreadID: m.ThreadID},
 	)
 
 	return err
