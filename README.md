@@ -7,30 +7,29 @@ annotations will be added to Grafana.
 
 ###### /start tagName,anotherOneTag
 
-```markdown
-You're subscribe for tags:
-tagName
-anotherOneTag  
+```
+You're successfully subscribed for tags:
+tagName anotherOneTag
 ```
 
 ###### /stop
 
-```markdown
-You're successfully unsubscribe for tags:
-tagName
-anotherOneTag
+```
+You're successfully unsubscribe for tags: [tagName anotherOneTag]
 ```
 
 ###### /status
 
-```markdown
-**Grafana**
+```
+Grafana
 Version: 5.4.2
 Database: ok
 
-**Telegram Bot**
-Version: go1.21.6
-Uptime: Thu, 21 Mar 2019 11:45:24 MSK
+Telegram Bot
+Version: v2.1.0
+Build date: 2024-05-24T15:14:46Z
+Go version: go1.21.6
+Uptime: Fri, 24 May 2024 15:15:40 UTC
 ```
 
 ## Installation
@@ -63,7 +62,7 @@ docker run -d \
 	-e 'GRAFANA_URL=http://grafana:3000' \
 	-e 'GRAFANA_TOKEN=XXX' \
 	-e 'STORE=etcd' \
-	-e 'ETCD_URL=localhost:2379' \
+	-e 'ETCD_ENDPOINTS=localhost:2379' \
 	-e 'ETCD_TLS_INSECURE=true' \
 	-e 'TELEGRAM_ADMIN=1234567' \
 	-e 'TELEGRAM_TOKEN=XXX' \
@@ -92,7 +91,7 @@ docker run -d \
 | --store.type                     | STORE_TYPE                       | False    | `bolt`                 | The store to use. Possible values: `bolt`, `etcd`                                                       |
 | --store.keyPrefix                | STORE_KEY_PREFIX                 | False    | `annotationsbot/chats` | Prefix for store keys                                                                                   |
 | --bolt.path                      | BOLT_PATH                        | False    | `/tmp/bot.db`          | Bolt database file path                                                                                 |
-| --etcd.url                       | ETCD_URL                         | False    | `localhost:2379`       |                                                                                                         |
+| --etcd.endpoints                 | ETCD_ENDPOINTS                   | False    | `localhost:2379`       | The endpoints that's used to connect to the etcd store                                                  |
 | --etcd.tls.insecure              | ETCD_TLS_INSECURE                | False    | `false`                | Insecure connection to ETCD                                                                             |
 | --etcd.tls.insecureSkipVerify    | ETCD_TLS_INSECURE_SKIP_VERIFY    | False    | `false`                | ETCD TLS config - insecure skip verify                                                                  |
 | --etcd.tls.cert                  | ETCD_TLS_CERT                    | False    |                        | ETCD TLS config - client cert file path                                                                 |
