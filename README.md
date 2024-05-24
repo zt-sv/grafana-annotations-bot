@@ -1,33 +1,37 @@
-# Telegram Bot for Grafana's Annotations 
-
-[![Build Status](https://cloud.drone.io/api/badges/zt-sv/grafana-annotations-bot/status.svg)](https://cloud.drone.io/zt-sv/grafana-annotations-bot)
-[![Docker Repository on Quay](https://quay.io/repository/zt-sv/grafana-annotations-bot/status "Docker Repository on Quay")](https://quay.io/repository/zt-sv/grafana-annotations-bot)
-
-This is the [Grafana annotations](http://docs.grafana.org/http_api/annotations/) Telegram bot that notifies you when new annotations will be added to Grafana.  
+Telegram Bot for Grafana's Annotations
+---
+This is the [Grafana annotations](http://docs.grafana.org/http_api/annotations/) Telegram bot that notifies you when new
+annotations will be added to Grafana.
 
 ## Commands
 
 ###### /start tagName,anotherOneTag
 
-> You're subscribe for tags:
-> tagName
-> anotherOneTag  
+```markdown
+You're subscribe for tags:
+tagName
+anotherOneTag  
+```
 
 ###### /stop
 
-> You're successfully unsubscribe for tags:
-> tagName
-> anotherOneTag
+```markdown
+You're successfully unsubscribe for tags:
+tagName
+anotherOneTag
+```
 
 ###### /status
 
-> **Grafana**
-> Version: 5.4.2
-> Database: ok
-> 
-> **Telegram Bot**
-> Version: go1.11.4
-> Uptime: Thu, 21 Mar 2019 11:45:24 MSK
+```markdown
+**Grafana**
+Version: 5.4.2
+Database: ok
+
+**Telegram Bot**
+Version: go1.21.6
+Uptime: Thu, 21 Mar 2019 11:45:24 MSK
+```
 
 ## Installation
 
@@ -75,6 +79,7 @@ docker run -d \
 `go get github.com/zt-sv/grafana-annotations-bot`
 
 ### Configuration
+
 | Flag                             | ENV                              | Required | Default                | Description                                                                                             |
 |----------------------------------|----------------------------------|----------|------------------------|---------------------------------------------------------------------------------------------------------|
 | --grafana.url                    | GRAFANA_URL                      | True     |                        | The URL that's used to connect to the Grafana, example: `http://localhost:3000`                         |
@@ -100,9 +105,11 @@ docker run -d \
 | --telegram.admin                 | TELEGRAM_ADMIN                   | True     |                        | Telegram admin IDs                                                                                      |
 
 #### Authentication
-Users may be allowed to command the bot specifies by multiply `--telegram.admin` command line option. 
+
+Users may be allowed to command the bot specifies by multiply `--telegram.admin` command line option.
 
 Example:
+
 ```bash
 grafana-annotations-bot --telegram.admin=123 --telegram.admin=456
 ```
@@ -110,15 +117,18 @@ grafana-annotations-bot --telegram.admin=123 --telegram.admin=456
 Or by specifying a newline-separated list of telegram user IDs in the TELEGRAM_ADMIN environment variable.
 
 Example:
+
 ```bash
 TELEGRAM_ADMIN="123\n456" grafana-annotations-bot
 ```
 
 #### Message template
+
 Message template specifies by `--template.path` command line option or by TEMPLATE_PATH environment variable.
 [Default template](default.tmpl)
 
 ##### Template variables
+
 | Go template variable | Type     | Description                                            |
 |----------------------|----------|--------------------------------------------------------|
 | {{.Title}}           | string   | Annotation title                                       |
@@ -128,7 +138,6 @@ Message template specifies by `--template.path` command line option or by TEMPLA
 | {{.FormattedDate}}   | string   | Annotation date in RFC1123 format                      |
 | {{.Text}}            | string   | Raw annotation body string                             |
 
-
 ## License
 
-  [MIT](LICENSE)
+[MIT](LICENSE)

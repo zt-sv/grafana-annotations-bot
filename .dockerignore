@@ -3,6 +3,6 @@ default.tmpl
 *.md
 .gitignore
 .env.example
-.drone.yml
 vendor
 dist
+.github
