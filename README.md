@@ -33,7 +33,7 @@ This is the [Grafana annotations](http://docs.grafana.org/http_api/annotations/)
 
 ### Docker
 
-`docker pull quay.io/zt-sv/grafana-annotations-bot:1.1.0`
+`docker pull docker.io/z7sv/grafana-annotations-bot:latest`
 
 #### Bolt Storage
 
@@ -49,7 +49,7 @@ docker run -d \
 	-v '/data/grafana-annotations-bot:/data' \
 	-v '${PWD}/default.tmpl:/templates/default.tmpl' \
 	--name grafana-annotations-bot \
-	quay.io/zt-sv/grafana-annotations-bot:1.1.0
+	docker.io/z7sv/grafana-annotations-bot:latest
 ```
 
 #### ETCD Storage
@@ -67,7 +67,7 @@ docker run -d \
 	-v '/data/grafana-annotations-bot:/data' \
 	-v '${PWD}/default.tmpl:/templates/default.tmpl' \
 	--name grafana-annotations-bot \
-	quay.io/zt-sv/grafana-annotations-bot:1.1.0
+	docker.io/z7sv/grafana-annotations-bot:latest
 ```
 
 ### Build from source
