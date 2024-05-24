@@ -4,11 +4,11 @@ import (
 	"strings"
 
 	"github.com/go-kit/kit/log/level"
-	"github.com/tucnak/telebot"
+	"gopkg.in/telebot.v3"
 )
 
-func (bot *Bot) handleStop(m *telebot.Message) {
-	exist, err := bot.store.ExistChat(m.Chat)
+func (bot *Bot) handleStop(m *telebot.Message) error {
+	exist, err := bot.store.ExistChat(m.Chat, m.ThreadID)
 
 	if err != nil {
 		level.Error(bot.logger).Log("msg", "Could check key in store", "err", err)
@@ -16,25 +16,40 @@ func (bot *Bot) handleStop(m *telebot.Message) {
 
 	if !exist {
 		level.Warn(bot.logger).Log("msg", "Chat not subscribed for tags", "chat", m.Chat.ID)
-		bot.tb.Send(m.Chat, "You're not subscribed for any tags yet")
-
-		return
+		_, err := bot.tb.Send(
+			m.Chat,
+			"You're not subscribed for any tags yet",
+			&telebot.SendOptions{ParseMode: telebot.ModeMarkdown, ThreadID: m.ThreadID},
+		)
+		return err
 	}
 
 	if err != nil {
 		level.Error(bot.logger).Log("msg", "Could not remove chat from store", "err", err)
-		bot.tb.Send(m.Chat, "Something went wrong...")
-
-		return
+		_, err := bot.tb.Send(
+			m.Chat,
+			"Something went wrong...",
+			&telebot.SendOptions{ParseMode: telebot.ModeMarkdown, ThreadID: m.ThreadID},
+		)
+		return err
 	}
 
-	chatTags, err := bot.store.GetChatTags(m.Chat)
-	err = bot.store.Remove(m.Chat)
+	chatTags, err := bot.store.GetChatTags(m.Chat, m.ThreadID)
+	err = bot.store.Remove(m.Chat, m.ThreadID)
 
 	if chatTags != nil {
-		bot.tb.Send(m.Chat, "You're successfully unsubscribe for tags:\n"+strings.Join(chatTags, "\n"))
-		return
+		_, err := bot.tb.Send(
+			m.Chat,
+			"You're successfully unsubscribe for tags:\n"+strings.Join(chatTags, "\n"),
+			&telebot.SendOptions{ParseMode: telebot.ModeMarkdown, ThreadID: m.ThreadID},
+		)
+		return err
 	}
 
-	bot.tb.Send(m.Chat, "You're successfully unsubscribe")
+	_, err = bot.tb.Send(
+		m.Chat,
+		"You're successfully unsubscribe",
+		&telebot.SendOptions{ParseMode: telebot.ModeMarkdown, ThreadID: m.ThreadID},
+	)
+	return err
 }

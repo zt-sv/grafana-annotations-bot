@@ -8,7 +8,7 @@ platform:
 
 workspace:
   base: /go
-  path: src/github.com/13rentgen/grafana-annotations-bot
+  path: src/github.com/zt-sv/grafana-annotations-bot
 
 steps:
   - name: build
@@ -56,7 +56,7 @@ steps:
   - name: docker
     image: plugins/docker
     settings:
-      repo: quay.io/13rentgen/grafana-annotations-bot
+      repo: quay.io/zt-sv/grafana-annotations-bot
       registry: quay.io
       username:
         from_secret: docker_username

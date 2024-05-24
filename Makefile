@@ -1,8 +1,8 @@
 EXECUTABLE ?= grafana-annotations-bot
 GO := CGO_ENABLED=0 go
-DRONE_TAG ?= dev
-VPREFIX := github.com/13rentgen/grafana-annotations-bot/internal/pkg/build
-LDFLAGS += -X $(VPREFIX).Version=$(DRONE_TAG) -X $(VPREFIX).BuildDate=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+APP_VERSION ?= dev
+VPREFIX := github.com/zt-sv/grafana-annotations-bot/internal/pkg/build
+LDFLAGS += -X $(VPREFIX).Version=$(APP_VERSION) -X $(VPREFIX).BuildDate=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 LDFLAGS += -extldflags '-static'
 
 PACKAGES = $(shell go list ./... | grep -v /vendor/)
@@ -43,4 +43,4 @@ release:
 	@which gox > /dev/null; if [ $$? -ne 0 ]; then \
 		$(GO) install github.com/mitchellh/gox@v1.0.1; \
 	fi
-	CGO_ENABLED=0 gox -arch="amd64 arm" -verbose -ldflags '-w $(LDFLAGS)' -output="dist/$(EXECUTABLE)-${DRONE_TAG}-{{.OS}}-{{.Arch}}" ./cmd/$(EXECUTABLE)
+	CGO_ENABLED=0 gox -arch="amd64 arm" -verbose -ldflags '-w $(LDFLAGS)' -output="dist/$(EXECUTABLE)-${APP_VERSION}-{{.OS}}-{{.Arch}}" ./cmd/$(EXECUTABLE)

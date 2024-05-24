@@ -6,13 +6,13 @@ import (
 	"os"
 	"time"
 
-	app "github.com/13rentgen/grafana-annotations-bot/internal/app/grafana-annotations-bot"
-	"github.com/13rentgen/grafana-annotations-bot/internal/pkg/database"
-	"github.com/13rentgen/grafana-annotations-bot/internal/pkg/grafana"
-	tg "github.com/13rentgen/grafana-annotations-bot/internal/pkg/telegram"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"github.com/oklog/run"
+	app "github.com/zt-sv/grafana-annotations-bot/internal/app/grafana-annotations-bot"
+	"github.com/zt-sv/grafana-annotations-bot/internal/pkg/database"
+	"github.com/zt-sv/grafana-annotations-bot/internal/pkg/grafana"
+	tg "github.com/zt-sv/grafana-annotations-bot/internal/pkg/telegram"
 )
 
 func main() {
