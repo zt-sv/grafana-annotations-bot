@@ -17,8 +17,10 @@ import (
 const (
 	// StoreTypeBolt : boltdb store type
 	StoreTypeBolt = "bolt"
-	// StoreTypeEtcd : etcd store type
-	StoreTypeEtcd = "etcd"
+	// StoreTypeEtcdV2 : ETCDv2 store type
+	StoreTypeEtcdV2 = "etcdv2"
+	// StoreTypeEtcdV3 : ETCDv3 store type
+	StoreTypeEtcdV3 = "etcdv3"
 
 	storeKeyPrefix = "annotationsbot/chats"
 
@@ -33,7 +35,7 @@ type boltdbStoreConfig struct {
 }
 
 type etcdStoreConfig struct {
-	URL                   *url.URL
+	Endpoints             []*url.URL
 	TLSInsecure           bool
 	TLSInsecureSkipVerify bool
 	TLSCert               string
@@ -112,10 +114,10 @@ func LoadConfig() (Configuration, error) {
 		Envar("GRAFANA_TLS_KEY_FILE").
 		ExistingFileVar(&config.GrafanaConfig.TLSKey)
 
-	a.Flag("store.type", fmt.Sprintf("The store to use. Possible values %s, %s", StoreTypeBolt, StoreTypeEtcd)).
+	a.Flag("store.type", fmt.Sprintf("The store to use. Possible values %s, %s. %s", StoreTypeBolt, StoreTypeEtcdV2, StoreTypeEtcdV3)).
 		Envar("STORE_TYPE").
 		Default(StoreTypeBolt).
-		EnumVar(&config.StorageConfig.StoreType, StoreTypeBolt, StoreTypeEtcd)
+		EnumVar(&config.StorageConfig.StoreType, StoreTypeBolt, StoreTypeEtcdV2, StoreTypeEtcdV3)
 
 	a.Flag("store.keyPrefix", "Prefix for store keys").
 		Envar("STORE_KEY_PREFIX").
@@ -127,10 +129,10 @@ func LoadConfig() (Configuration, error) {
 		Envar("BOLT_PATH").
 		StringVar(&config.StorageConfig.BoltdbStoreConfig.Path)
 
-	a.Flag("etcd.url", "The URL that's used to connect to the etcd store").
+	a.Flag("etcd.endpoints", "The endpoints that's used to connect to the etcd store").
 		Default("localhost:2379").
-		Envar("ETCD_URL").
-		URLVar(&config.StorageConfig.EtcdStoreConfig.URL)
+		Envar("ETCD_ENDPOINTS").
+		URLListVar(&config.StorageConfig.EtcdStoreConfig.Endpoints)
 
 	a.Flag("etcd.tls.insecure", "Insecure connection to ETCD").
 		Default("false").

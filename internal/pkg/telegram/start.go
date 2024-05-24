@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/go-kit/kit/log/level"
@@ -32,7 +33,7 @@ func (bot *Bot) handleStart(m *telebot.Message) error {
 		if err != nil {
 			bot.tb.Send(
 				m.Chat,
-				"You're already subscribe for tags\n\nUnsubscribe first",
+				"You're already subscribed for tags\n\nUnsubscribe first",
 				&telebot.SendOptions{ParseMode: telebot.ModeMarkdown, ThreadID: m.ThreadID},
 			)
 			return err
@@ -40,8 +41,8 @@ func (bot *Bot) handleStart(m *telebot.Message) error {
 
 		_, err = bot.tb.Send(
 			m.Chat,
-			"You're already subscribe for tags:\n"+strings.Join(chatTags, "\n")+"\n\nUnsubscribe first",
-			&telebot.SendOptions{ParseMode: telebot.ModeMarkdown, ThreadID: m.ThreadID},
+			fmt.Sprintf("You're already subscribed for tags:\n%v.\n\nUnsubscribe first", chatTags),
+			&telebot.SendOptions{ThreadID: m.ThreadID},
 		)
 
 		return err
@@ -51,7 +52,7 @@ func (bot *Bot) handleStart(m *telebot.Message) error {
 	bot.store.AddChatTags(m.Chat, m.ThreadID, tags)
 	_, err = bot.tb.Send(
 		m.Chat,
-		"You're subscribe for tags:\n"+strings.Join(tags, "\n"),
+		fmt.Sprintf("You're successfully subscribed for tags:\n%v", tags),
 		&telebot.SendOptions{ParseMode: telebot.ModeMarkdown, ThreadID: m.ThreadID},
 	)
 	return err

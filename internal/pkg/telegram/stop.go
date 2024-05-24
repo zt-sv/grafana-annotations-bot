@@ -1,8 +1,7 @@
 package telegram
 
 import (
-	"strings"
-
+	"fmt"
 	"github.com/go-kit/kit/log/level"
 	"gopkg.in/telebot.v3"
 )
@@ -40,8 +39,8 @@ func (bot *Bot) handleStop(m *telebot.Message) error {
 	if chatTags != nil {
 		_, err := bot.tb.Send(
 			m.Chat,
-			"You're successfully unsubscribe for tags:\n"+strings.Join(chatTags, "\n"),
-			&telebot.SendOptions{ParseMode: telebot.ModeMarkdown, ThreadID: m.ThreadID},
+			fmt.Sprintf("You're successfully unsubscribe for tags: %v", chatTags),
+			&telebot.SendOptions{ThreadID: m.ThreadID},
 		)
 		return err
 	}
