@@ -102,6 +102,9 @@ docker run -d \
 | --telegram.token                 | TELEGRAM_TOKEN                   | True     |                        | The token used to connect with Telegram. Token you get from [@botfather](https://telegram.me/botfather) |
 | --template.path                  | TEMPLATE_PATH                    | True     |                        | The path to the template                                                                                |
 | --telegram.admin                 | TELEGRAM_ADMIN                   | True     |                        | Telegram admin IDs                                                                                      |
+| --telegram.proxy.addr            | TELEGRAM_PROXY_ADDR              | False    |                        | SOCKS5 proxy for Telegram                                                                               |
+| --telegram.proxy.user            | TELEGRAM_PROXY_USER              | False    |                        | SOCKS5 proxy username                                                                                   |
+| --telegram.proxy.pass            | TELEGRAM_PROXY_PASS              | False    |                        | SOCKS5 proxy password                                                                                   |
 
 #### Authentication
 

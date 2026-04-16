@@ -78,6 +78,9 @@ func main() {
 			Template:      config.Template,
 			GrafanaClient: grafanaClient,
 			Admins:        config.TelegramAdmins,
+			ProxyAddr:     config.TelegramProxyAddr,
+			ProxyUser:     config.TelegramProxyUser,
+			ProxyPass:     config.TelegramProxyPass,
 		},
 	)
 

@@ -3,6 +3,8 @@ package telegram
 import (
 	"context"
 	"html/template"
+	"net"
+	"net/http"
 	"time"
 
 	"github.com/go-kit/kit/log"
@@ -10,6 +12,7 @@ import (
 	"github.com/oklog/run"
 	"github.com/zt-sv/grafana-annotations-bot/internal/pkg/database"
 	"github.com/zt-sv/grafana-annotations-bot/internal/pkg/grafana"
+	"golang.org/x/net/proxy"
 	"gopkg.in/telebot.v3"
 )
 
@@ -29,6 +32,9 @@ type BotOptions struct {
 	Template      *template.Template
 	GrafanaClient *grafana.Client
 	Admins        []int64
+	ProxyAddr     string
+	ProxyUser     string
+	ProxyPass     string
 }
 
 // Bot : telegram bot
@@ -43,11 +49,39 @@ type Bot struct {
 	admins        []int64
 }
 
+func initSocks5Client(proxyAddr string, proxyUser string, proxyPassword string) (*http.Client, error) {
+	dialer, err := proxy.SOCKS5("tcp", proxyAddr, &proxy.Auth{User: proxyUser, Password: proxyPassword}, proxy.Direct)
+	if err != nil {
+		return nil, err
+	}
+
+	httpTransport := &http.Transport{}
+	httpClient := &http.Client{Transport: httpTransport}
+	dialContext := func(ctx context.Context, network, address string) (net.Conn, error) {
+		return dialer.Dial(network, address)
+	}
+
+	httpTransport.DialContext = dialContext
+
+	return httpClient, nil
+}
+
 // NewBot : create new telegram bot
 func NewBot(options BotOptions) (*Bot, error) {
+	var httpClient *http.Client
+
+	if options.ProxyAddr != "" {
+		var err error
+		httpClient, err = initSocks5Client(options.ProxyAddr, options.ProxyUser, options.ProxyPass)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	bot, err := telebot.NewBot(telebot.Settings{
 		Token:  options.Token,
 		Poller: &telebot.LongPoller{Timeout: 10 * time.Second},
+		Client: httpClient,
 	})
 
 	if err != nil {
