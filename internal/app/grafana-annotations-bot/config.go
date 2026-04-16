@@ -63,14 +63,17 @@ type StorageConfig struct {
 
 // Configuration : main project configuration
 type Configuration = struct {
-	GrafanaConfig  grafanaConfig
-	StorageConfig  StorageConfig
-	LogLevel       string
-	LogJSON        bool
-	TelegramAdmins []int64
-	TelegramToken  string
-	TemplatePath   string
-	Template       *template.Template
+	GrafanaConfig     grafanaConfig
+	StorageConfig     StorageConfig
+	LogLevel          string
+	LogJSON           bool
+	TelegramAdmins    []int64
+	TelegramToken     string
+	TemplatePath      string
+	TelegramProxyAddr string
+	TelegramProxyUser string
+	TelegramProxyPass string
+	Template          *template.Template
 }
 
 // LoadConfig : load application config
@@ -180,6 +183,18 @@ func LoadConfig() (Configuration, error) {
 		Required().
 		Envar("TELEGRAM_ADMIN").
 		Int64ListVar(&config.TelegramAdmins)
+
+	a.Flag("telegram.proxy.addr", "SOCKS5 proxy address").
+		Envar("TELEGRAM_PROXY_ADDR").
+		StringVar(&config.TelegramProxyAddr)
+
+	a.Flag("telegram.proxy.user", "SOCKS5 proxy user").
+		Envar("TELEGRAM_PROXY_USER").
+		StringVar(&config.TelegramProxyUser)
+
+	a.Flag("telegram.proxy.pass", "SOCKS5 proxy pass").
+		Envar("TELEGRAM_PROXY_PASS").
+		StringVar(&config.TelegramProxyPass)
 
 	_, err := a.Parse(os.Args[1:])
 
